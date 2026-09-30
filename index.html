@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Dealbuch: alle Kooperationen, Fristen, Honorare und Zahlungen als Creator an einem Ort.">
+<meta name="theme-color" content="#f4f5f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Dealbuch">
+<title>Dealbuch</title>
+<style>
+  /* Kühles Grau mit warmem Orange als einzigem Akzent. Rot heißt überfällig,
+     Grün heißt bezahlt; beides ist Bedeutung, kein zweiter Akzent. Kontraste
+     gegen die Kartenfarbe gerechnet, alle Textfarben über 4,5 zu 1. */
+  :root {
+    color-scheme: light dark;
+    --bg: #f4f5f7;
+    --card: #ffffff;
+    --rand: #e3e6eb;
+    --vertieft: #eef0f3;
+    --text: #111827;
+    --leise: #4b5563;
+    --akzent: #c2410c;
+    --auf-akzent: #ffffff;
+    --akzent-flaeche: #fff4ed;
+    --rot: #b42318;
+    --gruen: #0b7a55;
+    --schatten: 0 1px 2px rgba(17, 24, 39, .05), 0 8px 24px rgba(17, 24, 39, .05);
+    --r-karte: 16px;
+    --r-feld: 12px;
+    --schrift: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0e1116;
+      --card: #171b22;
+      --rand: #262c36;
+      --vertieft: #1f242d;
+      --text: #e8ebf0;
+      --leise: #9aa3af;
+      --akzent: #fb923c;
+      --auf-akzent: #1c0a02;
+      --akzent-flaeche: #2a1a10;
+      --rot: #f87171;
+      --gruen: #34d399;
+      --schatten: none;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.5 var(--schrift); font-variant-numeric: tabular-nums;
+    padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+  }
+  .seite { max-width: 600px; margin: 0 auto; padding: 16px 16px 40px; display: grid; gap: 16px; }
+  .kopf { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 4px 0; }
+  .marke { margin: 0; font-size: 1.25rem; font-weight: 750; letter-spacing: -0.01em; }
+  .jahr { display: flex; align-items: center; gap: 4px; }
+  .jahr span { min-width: 3.2em; text-align: center; font-weight: 650; }
+
+  .karte { background: var(--card); border: 1px solid var(--rand); border-radius: var(--r-karte); box-shadow: var(--schatten); padding: 18px; }
+  h2 { margin: 0 0 12px; font-size: 1.05rem; font-weight: 700; }
+  h3 { margin: 0; font-size: 1rem; font-weight: 700; }
+  p { margin: 0 0 10px; }
+  .leise { color: var(--leise); }
+  .klein { font-size: 0.875rem; }
+  a { color: var(--akzent); }
+  .rot { color: var(--rot); }
+  .gruen { color: var(--gruen); }
+
+  .geld { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 16px; margin: 0; }
+  .geld div { min-width: 0; }
+  .geld dt { color: var(--leise); font-size: 0.9rem; }
+  .geld dd { margin: 2px 0 0; font-size: 1.35rem; font-weight: 750; letter-spacing: -0.01em; }
+  .geld dd small { display: block; font-size: 0.8rem; font-weight: 500; color: var(--leise); letter-spacing: 0; }
+
+  .frist { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; padding: 10px 0; align-items: baseline; }
+  .frist + .frist { border-top: 1px solid var(--rand); }
+  .frist .wann { font-weight: 700; white-space: nowrap; }
+  .frist .was { min-width: 0; overflow-wrap: anywhere; }
+  .frist .rest { grid-column: 2; font-size: 0.85rem; }
+
+  form { display: grid; gap: 12px; }
+  .feld { display: grid; gap: 6px; }
+  .feld label, .label { font-size: 0.9rem; font-weight: 600; }
+  .zwei { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .drei { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  @media (max-width: 420px) { .drei { grid-template-columns: 1fr; } }
+  input[type="text"], input[type="date"], select, textarea {
+    width: 100%; min-height: 48px; padding: 10px 14px; border: 1px solid var(--rand); border-radius: var(--r-feld);
+    background: var(--card); color: var(--text); font: inherit;
+  }
+  select { appearance: auto; }
+  textarea { min-height: 88px; resize: vertical; }
+  input::placeholder, textarea::placeholder { color: var(--leise); opacity: 1; }
+  input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visible, summary:focus-visible {
+    outline: 2px solid var(--akzent); outline-offset: 2px;
+  }
+  .fehler { color: var(--rot); font-size: 0.9rem; margin: 0; }
+  .haken { display: flex; gap: 12px; align-items: flex-start; min-height: 44px; }
+  .haken input { width: 22px; height: 22px; margin-top: 2px; accent-color: var(--akzent); flex: none; }
+
+  button { font: inherit; cursor: pointer; }
+  .knopf {
+    min-height: 48px; padding: 10px 18px; border-radius: var(--r-feld); border: 1px solid var(--rand);
+    background: var(--card); color: var(--text); font-weight: 650; transition: transform .12s ease;
+  }
+  .knopf:active { transform: scale(.98); }
+  .knopf.haupt { background: var(--akzent); border-color: var(--akzent); color: var(--auf-akzent); }
+  .knopf.gefahr { color: var(--rot); }
+  .knopf.klein-k { min-height: 44px; padding: 8px 14px; font-size: 0.9rem; }
+  .knopf.rund { min-height: 44px; min-width: 44px; padding: 0 12px; }
+  @media (prefers-reduced-motion: reduce) { .knopf { transition: none; } .knopf:active { transform: none; } }
+  .knopfreihe { display: flex; flex-wrap: wrap; gap: 10px; }
+
+  .spalte-kopf { margin: 18px 0 8px; font-size: 0.85rem; font-weight: 700; color: var(--leise); }
+  .spalte-kopf:first-child { margin-top: 0; }
+  .deal { border: 1px solid var(--rand); border-radius: var(--r-feld); padding: 14px; display: grid; gap: 6px; }
+  .deal + .deal { margin-top: 10px; }
+  .deal.markiert { border-color: var(--akzent); }
+  .deal-kopf { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+  .deal-kopf h3 { overflow-wrap: anywhere; }
+  .deal-kopf .betrag { font-weight: 750; white-space: nowrap; }
+  .deal .zeile { font-size: 0.9rem; color: var(--leise); overflow-wrap: anywhere; margin: 0; }
+  .hinweis-zeile { font-size: 0.875rem; margin: 0; padding: 6px 10px; border-radius: 8px; background: var(--akzent-flaeche); color: var(--text); }
+  .deal .knopfreihe { margin-top: 6px; }
+
+  details summary { cursor: pointer; font-weight: 700; list-style: none; display: flex; justify-content: space-between; align-items: center; min-height: 44px; }
+  details summary::-webkit-details-marker { display: none; }
+  details summary::after { content: "+"; color: var(--leise); font-size: 1.3rem; }
+  details[open] summary::after { content: "−"; }
+  details[open] summary { margin-bottom: 12px; }
+
+  .hinweis {
+    position: fixed; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom)); transform: translateX(-50%);
+    width: min(568px, calc(100% - 32px)); display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    background: var(--text); color: var(--bg); border-radius: var(--r-feld); padding: 8px 8px 8px 16px; box-shadow: 0 8px 30px rgba(0,0,0,.25);
+  }
+  .hinweis button { min-height: 44px; border: 0; background: none; color: inherit; font-weight: 700; text-decoration: underline; padding: 0 10px; }
+  .leer { text-align: center; padding: 8px 4px; }
+  .fuss { text-align: center; font-size: 0.875rem; color: var(--leise); padding-top: 4px; }
+  .fuss a { color: var(--leise); }
+  .nur-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+</style>
+</head>
+<body>
+<main class="seite">
+
+  <header class="kopf">
+    <h1 class="marke">Dealbuch</h1>
+    <div class="jahr" aria-label="Jahr für die Geldübersicht">
+      <button class="knopf rund" id="jahr-zurueck" type="button" aria-label="Vorheriges Jahr" data-ev="jahr_wechsel">‹</button>
+      <span id="jahr" aria-live="polite"></span>
+      <button class="knopf rund" id="jahr-vor" type="button" aria-label="Nächstes Jahr" data-ev="jahr_wechsel">›</button>
+    </div>
+  </header>
+
+  <section class="karte" id="willkommen" aria-labelledby="wk-titel" hidden style="border-color: var(--akzent)">
+    <h2 id="wk-titel">Alle Kooperationen an einem Ort</h2>
+    <p>Trag jeden Deal mit Marke, Honorar und Fristen ein. Dealbuch zeigt dir, was als Nächstes fällig ist, welche Rechnungen noch offen sind und wann eine Exklusivität mit einem neuen Angebot kollidiert.</p>
+    <button class="knopf haupt" type="button" id="wk-los" data-ev="start">Ersten Deal eintragen</button>
+  </section>
+
+  <section class="karte" aria-labelledby="geld-titel">
+    <h2 id="geld-titel">Dein Geld</h2>
+    <dl class="geld">
+      <div><dt>Rechnung offen</dt><dd id="g-offen"></dd></div>
+      <div><dt>Zugesagt</dt><dd id="g-zugesagt"></dd></div>
+      <div><dt id="g-bezahlt-label">Bezahlt</dt><dd class="gruen" id="g-bezahlt"></dd></div>
+      <div><dt id="g-sach-label">Produkte</dt><dd id="g-sach"></dd></div>
+    </dl>
+    <p class="klein leise" style="margin:14px 0 0">„Zugesagt“ heißt: noch keine Rechnung gestellt. „Produkte“ ist der Wert von Produkten, die du behalten darfst. Auch sie zählen steuerlich in der Regel als Einnahme (<a href="https://www.ihk.de/hamburg/produktmarken/beratung-service/recht-und-steuern/steuerrecht/allgemeine-informationen/steuern-fuer-influencer-5350958" target="_blank" rel="noopener noreferrer">IHK Hamburg</a>). Keine Steuerberatung.</p>
+  </section>
+
+  <section class="karte" aria-labelledby="naechstes-titel">
+    <h2 id="naechstes-titel">Als Nächstes</h2>
+    <div id="naechstes"></div>
+  </section>
+
+  <section class="karte" aria-labelledby="form-titel" id="form-karte">
+    <h2 id="form-titel">Neuer Deal</h2>
+    <form id="formular" novalidate>
+      <div class="zwei">
+        <div class="feld">
+          <label for="f-marke">Marke</label>
+          <input type="text" id="f-marke" maxlength="60" autocomplete="off" aria-describedby="f-marke-fehler" placeholder="zum Beispiel Hautwerk">
+        </div>
+        <div class="feld">
+          <label for="f-status">Stand</label>
+          <select id="f-status"></select>
+        </div>
+      </div>
+      <p class="fehler" id="f-marke-fehler" role="alert" hidden></p>
+      <div class="zwei">
+        <div class="feld">
+          <label for="f-honorar">Honorar in €</label>
+          <input type="text" id="f-honorar" inputmode="decimal" autocomplete="off" placeholder="0,00">
+        </div>
+        <div class="feld">
+          <label for="f-sachwert">Wert der Produkte in €</label>
+          <input type="text" id="f-sachwert" inputmode="decimal" autocomplete="off" placeholder="0,00">
+        </div>
+      </div>
+      <p class="fehler" id="f-geld-fehler" role="alert" hidden></p>
+      <div class="zwei">
+        <div class="feld">
+          <label for="f-plattform">Plattform</label>
+          <input type="text" id="f-plattform" maxlength="60" autocomplete="off" placeholder="Instagram, TikTok">
+        </div>
+        <div class="feld">
+          <label for="f-leistung">Leistung</label>
+          <input type="text" id="f-leistung" maxlength="120" autocomplete="off" placeholder="1 Reel, 3 Stories">
+        </div>
+      </div>
+      <div class="drei">
+        <div class="feld"><label for="f-fristEntwurf">Entwurf fällig</label><input type="date" id="f-fristEntwurf"></div>
+        <div class="feld"><label for="f-fristOnline">Veröffentlichung</label><input type="date" id="f-fristOnline"></div>
+        <div class="feld"><label for="f-fristZahlung">Zahlung fällig</label><input type="date" id="f-fristZahlung"></div>
+      </div>
+      <details id="mehr">
+        <summary>Exklusivität, Rechte, Kontakt, Notiz</summary>
+        <div style="display:grid;gap:12px">
+          <div class="zwei">
+            <div class="feld">
+              <label for="f-branche">Branche</label>
+              <input type="text" id="f-branche" maxlength="40" autocomplete="off" placeholder="zum Beispiel Kosmetik">
+            </div>
+            <div class="feld">
+              <label for="f-exklusivBis">Exklusiv bis</label>
+              <input type="date" id="f-exklusivBis">
+            </div>
+          </div>
+          <div class="zwei">
+            <div class="feld">
+              <label for="f-rechteBis">Nutzungsrechte bis</label>
+              <input type="date" id="f-rechteBis">
+            </div>
+            <div class="feld">
+              <label for="f-kontakt">Kontakt</label>
+              <input type="text" id="f-kontakt" maxlength="120" autocomplete="off" placeholder="Name oder E-Mail">
+            </div>
+          </div>
+          <div class="feld">
+            <label for="f-notiz">Notiz</label>
+            <textarea id="f-notiz" maxlength="500" rows="3"></textarea>
+          </div>
+          <label class="haken" for="f-werbung">
+            <input type="checkbox" id="f-werbung">
+            <span>Beitrag ist als Werbung gekennzeichnet</span>
+          </label>
+        </div>
+      </details>
+      <div class="knopfreihe">
+        <button class="knopf haupt" type="submit" id="f-speichern">Deal speichern</button>
+        <button class="knopf" type="button" id="f-abbrechen" hidden>Abbrechen</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="karte" aria-labelledby="deals-titel">
+    <h2 id="deals-titel">Laufende Deals</h2>
+    <div id="deals"></div>
+    <details id="fertig" style="margin-top:14px" hidden>
+      <summary id="fertig-titel">Abgeschlossen</summary>
+      <div id="deals-fertig"></div>
+    </details>
+  </section>
+
+  <section class="karte">
+    <details id="einstellungen">
+      <summary data-ev="einstellungen">Sichern und Exportieren</summary>
+      <p class="klein leise">Deine Deals liegen nur in diesem Browser auf diesem Gerät. Sichere sie ab und zu, sonst sind sie weg, wenn du die Browserdaten löschst.</p>
+      <div class="knopfreihe">
+        <button class="knopf" type="button" id="x-sicherung" data-ev="export_sicherung">Sicherung speichern</button>
+        <button class="knopf" type="button" id="x-einspielen" data-ev="import_sicherung">Sicherung einspielen</button>
+        <input type="file" id="x-datei" accept=".json,application/json" hidden>
+        <button class="knopf" type="button" id="x-kalender" data-ev="export_kalender">Fristen in den Kalender</button>
+        <button class="knopf" type="button" id="x-tabelle" data-ev="export_csv">Als Tabelle (CSV)</button>
+        <button class="knopf" type="button" id="x-nebenbei" data-ev="export_nebenbei">Bezahltes für Nebenbei</button>
+        <button class="knopf gefahr" type="button" id="x-loeschen" data-ev="alles_loeschen">Alle Daten löschen</button>
+      </div>
+      <p class="klein leise" style="margin:12px 0 0">„Fristen in den Kalender“ erzeugt eine Kalenderdatei, die du in Apple, Google oder Outlook öffnest. „Bezahltes für Nebenbei“ kannst du in <a href="https://klickmill.app/nebenbei/" target="_blank" rel="noopener">Nebenbei</a> unter „Sicherung einspielen“ laden, dort siehst du Gewinn und Steuergrenzen. Alles entsteht in deinem Browser, nichts wird hochgeladen.</p>
+    </details>
+  </section>
+
+  <section class="karte" aria-labelledby="beta-titel">
+    <h2 id="beta-titel">Du testest Dealbuch mit</h2>
+    <p>Dealbuch ist eine <strong>Testfassung</strong>. Es läuft im Browser, damit wir ohne Umweg über einen App-Store schnell verbessern können. In den Play Store und den App Store geht es erst, wenn du und viele andere es gern nutzen.</p>
+    <p>Wenn es dir hilft: <strong>teile es</strong>. Und sag uns, was fehlt oder stört. So bauen wir es mit dir zusammen weiter.</p>
+    <div class="feld" style="gap:10px">
+      <button class="knopf" id="beta-teilen" type="button" data-ev="teilen_app">App teilen</button>
+      <label class="label" for="beta-text">Dein Feedback</label>
+      <textarea id="beta-text" rows="3" maxlength="1000" placeholder="Was fehlt dir, was stört, was gefällt?"></textarea>
+      <label class="label" for="beta-kontakt">Kontakt für Rückfragen (freiwillig)</label>
+      <input id="beta-kontakt" type="text" maxlength="200" autocomplete="off" placeholder="E-Mail oder leer lassen">
+      <button class="knopf" id="beta-senden" type="button">Feedback senden</button>
+      <p class="klein" id="beta-stand" role="status" aria-live="polite" hidden></p>
+      <p class="klein leise" style="margin:0">Dein Feedback geht an uns (klickmill.app), ohne IP-Adresse und ohne Kennung. Deine Deals schicken wir nie mit. Mehr dazu im <a href="datenschutz.html">Datenschutz</a>.</p>
+    </div>
+  </section>
+
+  <section class="karte" aria-labelledby="ueber-titel">
+    <h2 id="ueber-titel">Was diese App nach außen schickt</h2>
+    <p>Deine Einträge bleiben in diesem Browser auf deinem Gerät. Nach außen gehen genau zwei Dinge, beide an klickmill.app: ein anonymer Zähler (App-Start und gedrückte Knöpfe, ohne Kennung, ohne Cookie) und dein Feedback, wenn du es oben abschickst. Sonst nichts: kein Konto, keine Werbung, keine fremden Skripte oder Schriften.</p>
+    <label class="haken" for="zaehler-aus" style="margin-top:8px">
+      <input type="checkbox" id="zaehler-aus">
+      <span>Zähler abschalten. Dann zählt dieses Gerät nicht mehr mit. Der Schalter bleibt nur hier gespeichert.</span>
+    </label>
+    <p class="leise" style="margin-top:10px">Version 1.1 vom 30.9.2026 · <a href="aenderungen.html">Was sich geändert hat</a></p>
+  </section>
+  <footer class="fuss">
+    <a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a>
+  </footer>
+</main>
+
+<div class="hinweis" id="hinweis" role="status" aria-live="polite" hidden>
+  <span id="hinweis-text"></span>
+  <button type="button" id="hinweis-knopf" hidden>Rückgängig</button>
+</div>
+
+<script src="deals.js"></script>
+<script>
+(function () {
+  "use strict";
+  var D = window.Deals;
+  var SPEICHER = "dealbuch";
+  var WOCHENTAG = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
+
+  var h = location.hostname;
+  var LOKAL = !h || h === "localhost" || h === "127.0.0.1";
+  var BASIS = "https://klickmill.app";
+  // Zähler-Schalter: liegt nur in diesem Browser, wird vor jedem Ping gelesen.
+  var ZAEHLER_AUS = "dealbuch-zaehler-aus";
+  function zaehlerAus() {
+    try { return localStorage.getItem(ZAEHLER_AUS) === "1"; } catch (e) { return false; }
+  }
+  (function () {
+    var box = document.getElementById("zaehler-aus");
+    if (!box) return;
+    box.checked = zaehlerAus();
+    box.addEventListener("change", function () {
+      try { localStorage.setItem(ZAEHLER_AUS, box.checked ? "1" : "0"); } catch (e) {}
+    });
+  })();
+  function ping(ev) {
+    if (LOKAL || zaehlerAus()) return;
+    fetch(BASIS + "/api/ping?app=dealbuch" + (ev ? "&ev=" + encodeURIComponent(ev) : "")).catch(function () {});
+  }
+
+  function heute() {
+    var d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+  function neueId() { return (Date.now().toString(36) + Math.random().toString(36).slice(2, 10)).slice(0, 20); }
+  function $(id) { return document.getElementById(id); }
+  function el(tag, klasse, text) {
+    var e = document.createElement(tag);
+    if (klasse) e.className = klasse;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function kurzDatum(t) {
+    var d = new Date(t + "T12:00:00");
+    return WOCHENTAG[d.getDay()] + " " + d.getDate() + "." + (d.getMonth() + 1) + ".";
+  }
+  function datumLang(t) { return parseInt(t.slice(8), 10) + "." + parseInt(t.slice(5, 7), 10) + "." + t.slice(0, 4); }
+
+  function laden() {
+    var leer = { v: 1, deals: [], willkommenWeg: false };
+    try {
+      var d = JSON.parse(localStorage.getItem(SPEICHER) || "null");
+      if (!d || !Array.isArray(d.deals)) return leer;
+      d.deals = d.deals.map(D.saeubern).filter(Boolean);
+      d.willkommenWeg = d.willkommenWeg === true;
+      return d;
+    } catch (e) { return leer; }
+  }
+  var daten = laden();
+  function speichern() {
+    try { localStorage.setItem(SPEICHER, JSON.stringify(daten)); return true; }
+    catch (e) { zeigeHinweis("Speichern hat nicht geklappt. Ist der Speicher voll oder privat?"); return false; }
+  }
+
+  var hinweisZeit = null, rueckgaengig = null;
+  function zeigeHinweis(text, beiRueckgaengig) {
+    $("hinweis-text").textContent = text;
+    rueckgaengig = beiRueckgaengig || null;
+    $("hinweis-knopf").hidden = !rueckgaengig;
+    $("hinweis").hidden = false;
+    clearTimeout(hinweisZeit);
+    hinweisZeit = setTimeout(function () { $("hinweis").hidden = true; rueckgaengig = null; }, 7000);
+  }
+  $("hinweis-knopf").addEventListener("click", function () {
+    if (rueckgaengig) rueckgaengig();
+    rueckgaengig = null;
+    $("hinweis").hidden = true;
+  });
+
+  var jahr = new Date().getFullYear();
+  var bearbeiteId = null;
+
+  // Formular
+  D.STATUS.forEach(function (s) {
+    var o = document.createElement("option");
+    o.value = s[0]; o.textContent = s[1];
+    $("f-status").appendChild(o);
+  });
+  var TEXTFELDER = ["marke", "plattform", "leistung", "branche", "kontakt", "notiz"];
+  var DATUMSFELDER = ["fristEntwurf", "fristOnline", "fristZahlung", "exklusivBis", "rechteBis"];
+  function formularLeeren() {
+    bearbeiteId = null;
+    TEXTFELDER.concat(DATUMSFELDER).forEach(function (k) { $("f-" + k).value = ""; });
+    $("f-honorar").value = ""; $("f-sachwert").value = "";
+    $("f-status").value = "zugesagt";
+    $("f-werbung").checked = false;
+    $("form-titel").textContent = "Neuer Deal";
+    $("f-speichern").textContent = "Deal speichern";
+    $("f-abbrechen").hidden = true;
+    $("mehr").open = false;
+    ["f-marke-fehler", "f-geld-fehler"].forEach(function (id) { $(id).hidden = true; });
+  }
+  function geldFeld(cent) { return cent ? (cent / 100).toFixed(2).replace(".", ",").replace(",00", "") : ""; }
+  function formularFuellen(d) {
+    bearbeiteId = d.id;
+    TEXTFELDER.concat(DATUMSFELDER).forEach(function (k) { $("f-" + k).value = d[k] || ""; });
+    $("f-honorar").value = geldFeld(d.honorar);
+    $("f-sachwert").value = geldFeld(d.sachwert);
+    $("f-status").value = d.status;
+    $("f-werbung").checked = d.werbung;
+    $("form-titel").textContent = "Deal bearbeiten: " + d.marke;
+    $("f-speichern").textContent = "Änderungen speichern";
+    $("f-abbrechen").hidden = false;
+    $("mehr").open = !!(d.branche || d.exklusivBis || d.rechteBis || d.kontakt || d.notiz || d.werbung);
+    $("form-karte").scrollIntoView({ behavior: "smooth", block: "start" });
+    $("f-marke").focus({ preventScroll: true });
+  }
+  $("f-abbrechen").addEventListener("click", formularLeeren);
+
+  $("formular").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var marke = $("f-marke").value.trim();
+    $("f-marke-fehler").hidden = true; $("f-geld-fehler").hidden = true;
+    if (!marke) {
+      $("f-marke-fehler").textContent = "Trag die Marke ein, dann kannst du speichern.";
+      $("f-marke-fehler").hidden = false; $("f-marke").setAttribute("aria-invalid", "true"); $("f-marke").focus();
+      return;
+    }
+    $("f-marke").removeAttribute("aria-invalid");
+    var honorar = D.parseBetrag($("f-honorar").value), sachwert = D.parseBetrag($("f-sachwert").value);
+    if (honorar === null || sachwert === null) {
+      $("f-geld-fehler").textContent = "Beträge bitte als Zahl, zum Beispiel 1500 oder 249,90.";
+      $("f-geld-fehler").hidden = false;
+      (honorar === null ? $("f-honorar") : $("f-sachwert")).focus();
+      return;
+    }
+    var alt = bearbeiteId ? daten.deals.find(function (x) { return x.id === bearbeiteId; }) : null;
+    var roh = { id: alt ? alt.id : neueId(), t: Date.now(), marke: marke, status: $("f-status").value, honorar: honorar, sachwert: sachwert,
+      werbung: $("f-werbung").checked, bezahltAm: alt ? alt.bezahltAm : "" };
+    TEXTFELDER.concat(DATUMSFELDER).forEach(function (k) { if (k !== "marke") roh[k] = $("f-" + k).value; });
+    if (roh.status === "bezahlt" && !roh.bezahltAm) roh.bezahltAm = heute();
+    if (roh.status !== "bezahlt") roh.bezahltAm = "";
+    var deal = D.saeubern(roh);
+    if (!deal) { zeigeHinweis("Das ließ sich nicht speichern. Prüf die Angaben."); return; }
+    var vorher = daten.deals.slice();
+    if (alt) daten.deals = daten.deals.map(function (x) { return x.id === deal.id ? deal : x; });
+    else daten.deals.push(deal);
+    daten.willkommenWeg = true;
+    if (!speichern()) { daten.deals = vorher; return; }
+    ping(alt ? "deal_bearbeitet" : "deal_neu");
+    formularLeeren();
+    render(deal.id);
+    var konflikte = D.exklusivKonflikte(daten.deals, deal, heute());
+    if (konflikte.length) {
+      zeigeHinweis("Achtung: " + konflikte[0].marke + " hat Exklusivität in „" + konflikte[0].branche + "“ bis " + datumLang(konflikte[0].exklusivBis) + ".");
+    } else {
+      zeigeHinweis(alt ? "Änderungen gespeichert." : "Deal gespeichert: " + deal.marke, function () {
+        daten.deals = vorher; speichern(); render();
+      });
+    }
+  });
+
+  function statusSetzen(d, neu) {
+    var vorher = daten.deals.slice();
+    var geaendert = Object.assign({}, d, { status: neu, t: Date.now(), bezahltAm: neu === "bezahlt" ? (d.bezahltAm || heute()) : "" });
+    daten.deals = daten.deals.map(function (x) { return x.id === d.id ? geaendert : x; });
+    if (!speichern()) { daten.deals = vorher; return; }
+    render(d.id);
+    zeigeHinweis(d.marke + ": " + D.STATUS_NAME[neu] + ".", function () { daten.deals = vorher; speichern(); render(); });
+  }
+  function loeschen(d) {
+    var vorher = daten.deals.slice();
+    daten.deals = daten.deals.filter(function (x) { return x.id !== d.id; });
+    if (!speichern()) { daten.deals = vorher; return; }
+    if (bearbeiteId === d.id) formularLeeren();
+    render();
+    zeigeHinweis("Deal gelöscht: " + d.marke, function () { daten.deals = vorher; speichern(); render(); });
+  }
+
+  function dealKarte(d, heuteT, markiert) {
+    var k = el("article", "deal" + (markiert ? " markiert" : ""));
+    k.id = "deal-" + d.id;
+    var kopf = el("div", "deal-kopf");
+    kopf.appendChild(el("h3", "", d.marke));
+    kopf.appendChild(el("span", "betrag", d.honorar ? D.euro(d.honorar) : (d.sachwert ? "Produkte" : "")));
+    k.appendChild(kopf);
+    var teile = [D.STATUS_NAME[d.status]];
+    if (d.leistung) teile.push(d.leistung);
+    if (d.plattform) teile.push(d.plattform);
+    k.appendChild(el("p", "zeile", teile.join(" · ")));
+    var fr = D.anstehend([d], heuteT);
+    if (fr.length) {
+      var f = fr[0];
+      k.appendChild(el("p", "zeile" + (f.tage < 0 ? " rot" : ""), f.art + ": " + datumLang(f.datum) + (f.tage < 0 ? ", überfällig" : "")));
+    }
+    if (d.status === "bezahlt" && d.bezahltAm) k.appendChild(el("p", "zeile gruen", "Bezahlt am " + datumLang(d.bezahltAm)));
+    if (d.exklusivBis && d.exklusivBis >= heuteT) k.appendChild(el("p", "zeile", "Exklusiv" + (d.branche ? " in „" + d.branche + "“" : "") + " bis " + datumLang(d.exklusivBis)));
+    if (d.rechteBis) k.appendChild(el("p", "zeile" + (d.rechteBis < heuteT ? " rot" : ""), "Nutzungsrechte bis " + datumLang(d.rechteBis) + (d.rechteBis < heuteT ? ", abgelaufen" : "")));
+    if (["online", "rechnung", "bezahlt"].indexOf(d.status) >= 0 && !d.werbung) {
+      k.appendChild(el("p", "hinweis-zeile", "Ist der Beitrag als Werbung gekennzeichnet? Dann hake es unter „Bearbeiten“ ab."));
+    }
+    var konflikte = d.status !== "abgesagt" && d.status !== "bezahlt" ? D.exklusivKonflikte(daten.deals, d, heuteT) : [];
+    if (konflikte.length) k.appendChild(el("p", "hinweis-zeile", "Achtung: " + konflikte[0].marke + " ist in „" + konflikte[0].branche + "“ exklusiv bis " + datumLang(konflikte[0].exklusivBis) + "."));
+    var reihe = el("div", "knopfreihe");
+    var weiter = D.naechsterStatus(d.status);
+    if (weiter) {
+      var w = el("button", "knopf haupt klein-k", "Weiter: " + D.STATUS_NAME[weiter]);
+      w.type = "button";
+      w.addEventListener("click", function () { ping("status_weiter"); statusSetzen(d, weiter); });
+      reihe.appendChild(w);
+    }
+    var b = el("button", "knopf klein-k", "Bearbeiten");
+    b.type = "button";
+    b.addEventListener("click", function () { formularFuellen(d); });
+    reihe.appendChild(b);
+    if (d.status !== "abgesagt" && d.status !== "bezahlt") {
+      var a = el("button", "knopf klein-k", "Absagen");
+      a.type = "button";
+      a.addEventListener("click", function () { statusSetzen(d, "abgesagt"); });
+      reihe.appendChild(a);
+    }
+    var x = el("button", "knopf klein-k gefahr", "Löschen");
+    x.type = "button";
+    x.setAttribute("aria-label", "Deal löschen: " + d.marke);
+    x.addEventListener("click", function () { loeschen(d); });
+    reihe.appendChild(x);
+    k.appendChild(reihe);
+    return k;
+  }
+
+  function render(markiertId) {
+    var heuteT = heute();
+    $("jahr").textContent = jahr;
+    var s = D.summen(daten.deals, jahr);
+    $("g-offen").textContent = D.euro(s.offen);
+    $("g-offen").className = s.offen ? "rot" : "";
+    $("g-zugesagt").textContent = D.euro(s.zugesagt);
+    $("g-bezahlt-label").textContent = "Bezahlt " + jahr;
+    $("g-bezahlt").textContent = D.euro(s.bezahlt);
+    var klein = el("small", "", s.anzahlBezahlt === 1 ? "1 Deal" : s.anzahlBezahlt + " Deals");
+    $("g-bezahlt").appendChild(klein);
+    $("g-sach-label").textContent = "Produkte " + jahr;
+    $("g-sach").textContent = D.euro(s.sachwert);
+    $("willkommen").hidden = daten.willkommenWeg || daten.deals.length > 0;
+
+    var box = $("naechstes");
+    box.textContent = "";
+    var fristen = D.anstehend(daten.deals, heuteT).slice(0, 8);
+    if (!fristen.length) box.appendChild(el("p", "leise leer", "Keine offenen Fristen. Trag bei deinen Deals Entwurf, Veröffentlichung und Zahlung ein, dann erscheinen sie hier."));
+    fristen.forEach(function (f) {
+      var z = el("div", "frist");
+      z.appendChild(el("span", "wann" + (f.tage < 0 ? " rot" : ""), kurzDatum(f.datum)));
+      z.appendChild(el("span", "was", f.art + ": " + f.marke));
+      var rest = f.tage < 0 ? (f.tage === -1 ? "Seit gestern überfällig" : "Seit " + -f.tage + " Tagen überfällig")
+        : f.tage === 0 ? "Heute" : f.tage === 1 ? "Morgen" : "In " + f.tage + " Tagen";
+      z.appendChild(el("span", "rest " + (f.tage < 0 ? "rot" : "leise"), rest));
+      box.appendChild(z);
+    });
+
+    var laufend = $("deals"), fertig = $("deals-fertig");
+    laufend.textContent = ""; fertig.textContent = "";
+    var aktiv = 0, zu = 0;
+    D.STATUS.forEach(function (st) {
+      var gruppe = daten.deals.filter(function (d) { return d.status === st[0]; })
+        .sort(function (a, b) { return b.t - a.t; });
+      if (!gruppe.length) return;
+      var ziel = st[0] === "bezahlt" || st[0] === "abgesagt" ? fertig : laufend;
+      ziel.appendChild(el("p", "spalte-kopf", st[1] + " (" + gruppe.length + ")"));
+      gruppe.forEach(function (d) {
+        ziel.appendChild(dealKarte(d, heuteT, d.id === markiertId));
+        if (ziel === fertig) zu++; else aktiv++;
+      });
+    });
+    if (!aktiv) laufend.appendChild(el("p", "leise leer", "Keine laufenden Deals. Trag oben deinen nächsten ein."));
+    $("fertig").hidden = !zu;
+    $("fertig-titel").textContent = "Abgeschlossen (" + zu + ")";
+    if (markiertId) {
+      var m = $("deal-" + markiertId);
+      if (m && m.closest("#deals-fertig")) $("fertig").open = true;
+    }
+  }
+
+  $("jahr-zurueck").addEventListener("click", function () { jahr--; render(); });
+  $("jahr-vor").addEventListener("click", function () { jahr++; render(); });
+  $("wk-los").addEventListener("click", function () {
+    daten.willkommenWeg = true; speichern(); render(); $("f-marke").focus();
+  });
+
+  // Dateien erzeugen (entstehen im Browser)
+  function herunterladen(inhalt, name, typ) {
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([inhalt], { type: typ }));
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  }
+  function wennDeals(f) { return function () { if (!daten.deals.length) { zeigeHinweis("Noch keine Deals eingetragen."); return; } f(); }; }
+  $("x-sicherung").addEventListener("click", wennDeals(function () {
+    herunterladen(D.sicherung(daten.deals), "dealbuch-sicherung-" + heute() + ".json", "application/json");
+  }));
+  $("x-tabelle").addEventListener("click", wennDeals(function () {
+    herunterladen(D.tabelle(daten.deals), "dealbuch-" + heute() + ".csv", "text/csv;charset=utf-8");
+  }));
+  $("x-kalender").addEventListener("click", wennDeals(function () {
+    if (!D.anstehend(daten.deals, "0000-01-01").length) { zeigeHinweis("Keine offenen Fristen für den Kalender."); return; }
+    herunterladen(D.kalender(daten.deals, new Date()), "dealbuch-fristen.ics", "text/calendar;charset=utf-8");
+  }));
+  $("x-nebenbei").addEventListener("click", wennDeals(function () {
+    if (!daten.deals.some(function (d) { return d.status === "bezahlt"; })) { zeigeHinweis("Noch kein Deal auf „Bezahlt“."); return; }
+    herunterladen(D.fuerNebenbei(daten.deals), "dealbuch-fuer-nebenbei-" + heute() + ".csv", "text/csv;charset=utf-8");
+  }));
+  $("x-einspielen").addEventListener("click", function () { $("x-datei").click(); });
+  $("x-datei").addEventListener("change", function () {
+    var datei = this.files && this.files[0];
+    this.value = "";
+    if (!datei) return;
+    if (datei.size > 5 * 1024 * 1024) { zeigeHinweis("Die Datei ist zu groß für eine Dealbuch-Sicherung."); return; }
+    var leser = new FileReader();
+    leser.onload = function () {
+      var e = D.sicherungLesen(leser.result);
+      if (!e) { zeigeHinweis("Das ist keine Dealbuch-Sicherung. Nimm die Datei von „Sicherung speichern“."); return; }
+      var vorher = daten.deals;
+      var m = D.zusammenfuehren(daten.deals, e.deals);
+      daten.deals = m.liste;
+      if (!speichern()) { daten.deals = vorher; return; }
+      render();
+      var t = m.dazu === 0 ? "Nichts Neues" : m.dazu === 1 ? "1 Deal dazu" : m.dazu + " Deals dazu";
+      if (m.aktualisiert) t += ", " + m.aktualisiert + " aktualisiert";
+      if (e.kaputt) t += ", " + e.kaputt + " unlesbar";
+      zeigeHinweis(t + ".");
+    };
+    leser.onerror = function () { zeigeHinweis("Die Datei ließ sich nicht lesen."); };
+    leser.readAsText(datei, "utf-8");
+  });
+  $("x-loeschen").addEventListener("click", function () {
+    if (!daten.deals.length) { zeigeHinweis("Es ist nichts gespeichert."); return; }
+    if (!confirm("Alle Deals auf diesem Gerät löschen? Das lässt sich nicht rückgängig machen.")) return;
+    try { localStorage.removeItem(SPEICHER); } catch (e) {}
+    daten = laden();
+    formularLeeren();
+    render();
+    zeigeHinweis("Alles gelöscht.");
+  });
+
+  // Zähler: ein Aufruf je Start, dazu Knöpfe mit data-ev (Einstellungen nur beim Öffnen).
+  ping();
+  document.addEventListener("click", function (e) {
+    var t = e.target && e.target.closest ? e.target.closest("[data-ev]") : null;
+    if (!t) return;
+    if (t.tagName === "SUMMARY" && t.parentElement.open) return;
+    ping(t.getAttribute("data-ev"));
+  });
+
+  function melde(text) { var s = $("beta-stand"); s.textContent = text; s.hidden = false; }
+  $("beta-teilen").addEventListener("click", function () {
+    var link = "https://klickmill.app/go/dealbuch?s=teilen";
+    var text = "Mit Dealbuch habe ich alle Kooperationen, Fristen und offenen Rechnungen im Blick. Läuft im Browser, ohne Konto.";
+    if (navigator.share) navigator.share({ title: "Dealbuch", text: text, url: link }).catch(function () {});
+    else if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(link).then(function () { melde("Link kopiert: " + link); }, function () { melde("Link zum Weitergeben: " + link); });
+    } else melde("Link zum Weitergeben: " + link);
+  });
+  $("beta-senden").addEventListener("click", function () {
+    var feld = $("beta-text"), kontakt = $("beta-kontakt"), knopf = $("beta-senden");
+    var text = (feld.value || "").trim();
+    if (text.length < 3) { melde("Schreib bitte ein, zwei Sätze, dann können wir etwas damit anfangen."); feld.focus(); return; }
+    if (LOKAL) { melde("Lokale Kopie: Feedback wird nicht gesendet."); return; }
+    knopf.disabled = true;
+    fetch(BASIS + "/api/feedback", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ app: "dealbuch", text: text.slice(0, 1000), kontakt: (kontakt.value || "").trim().slice(0, 200) })
+    }).then(function (r) {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      feld.value = ""; kontakt.value = "";
+      melde("Danke, dein Feedback ist angekommen.");
+    }).catch(function () { melde("Senden hat nicht geklappt. Versuch es später noch einmal."); })
+      .then(function () { knopf.disabled = false; });
+  });
+
+  if ("serviceWorker" in navigator && (location.protocol === "https:" || LOKAL)) {
+    navigator.serviceWorker.register("sw.js").catch(function () {});
+  }
+
+  formularLeeren();
+  render();
+})();
+</script>
+</body>
+</html>
