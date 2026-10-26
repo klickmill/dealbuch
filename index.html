@@ -12,7 +12,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Dealbuch">
-<title>Dealbuch</title>
+<title>Dealbuch: Marken-Kooperationen, Fristen und Honorare im Blick</title>
 <style>
   /* Kühles Grau mit warmem Orange als einzigem Akzent. Rot heißt überfällig,
      Grün heißt bezahlt; beides ist Bedeutung, kein zweiter Akzent. Kontraste
@@ -63,6 +63,7 @@
   .seite { max-width: 600px; margin: 0 auto; padding: 16px 16px 40px; display: grid; gap: 16px; }
   .kopf { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 4px 0; }
   .marke { margin: 0; font-size: 1.25rem; font-weight: 750; letter-spacing: -0.01em; }
+  .unterzeile { margin: 2px 0 0; font-size: 0.85rem; color: var(--leise); }
   .jahr { display: flex; align-items: center; gap: 4px; }
   .jahr span { min-width: 3.2em; text-align: center; font-weight: 650; }
 
@@ -92,8 +93,10 @@
   .feld { display: grid; gap: 6px; }
   .feld label, .label { font-size: 0.9rem; font-weight: 600; }
   .zwei { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .zwei .feld { align-content: end; } /* Felder bleiben auf einer Linie, auch wenn ein Label umbricht */
   .drei { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-  @media (max-width: 420px) { .drei { grid-template-columns: 1fr; } }
+  @media (max-width: 420px) { .drei, #mehr .zwei { grid-template-columns: 1fr; } }
+  @media (max-width: 360px) { .zwei { grid-template-columns: 1fr; } }
   input[type="text"], input[type="date"], select, textarea {
     width: 100%; min-height: 48px; padding: 10px 14px; border: 1px solid var(--rand); border-radius: var(--r-feld);
     background: var(--card); color: var(--text); font: inherit;
@@ -155,7 +158,10 @@
 <main class="seite">
 
   <header class="kopf">
-    <h1 class="marke">Dealbuch</h1>
+    <div>
+      <h1 class="marke">Dealbuch</h1>
+      <p class="unterzeile">Marken-Kooperationen, Fristen und Honorare im Blick</p>
+    </div>
     <div class="jahr" aria-label="Jahr für die Geldübersicht">
       <button class="knopf rund" id="jahr-zurueck" type="button" aria-label="Vorheriges Jahr" data-ev="jahr_wechsel">‹</button>
       <span id="jahr" aria-live="polite"></span>
@@ -165,7 +171,9 @@
 
   <section class="karte" id="willkommen" aria-labelledby="wk-titel" hidden style="border-color: var(--akzent)">
     <h2 id="wk-titel">Alle Kooperationen an einem Ort</h2>
-    <p>Trag jeden Deal mit Marke, Honorar und Fristen ein. Dealbuch zeigt dir, was als Nächstes fällig ist, welche Rechnungen noch offen sind und wann eine Exklusivität mit einem neuen Angebot kollidiert.</p>
+    <p><strong>Das Problem:</strong> Arbeitest du als Creator mit mehreren Marken, verlierst du schnell den Überblick. Wer zahlt wann? Was muss bis wann online sein? Und für wen darfst du gerade nicht werben?</p>
+    <p><strong>Die Lösung:</strong> Du trägst jede Zusammenarbeit mit einer Marke als Deal ein, mit Honorar und Fristen. Dealbuch zeigt dir, was als Nächstes fällig ist und welche Rechnung noch offen ist. Trägst du ein, bis wann du für eine Branche exklusiv bist, warnt es dich, wenn du bei einer anderen Marke dieselbe Branche einträgst.</p>
+    <p><strong>Zuerst:</strong> Trag deinen ersten Deal ein. Nur die Marke ist Pflicht.</p>
     <button class="knopf haupt" type="button" id="wk-los" data-ev="start">Ersten Deal eintragen</button>
   </section>
 
@@ -177,7 +185,8 @@
       <div><dt id="g-bezahlt-label">Bezahlt</dt><dd class="gruen" id="g-bezahlt"></dd></div>
       <div><dt id="g-sach-label">Produkte</dt><dd id="g-sach"></dd></div>
     </dl>
-    <p class="klein leise" style="margin:14px 0 0">„Zugesagt“ heißt: noch keine Rechnung gestellt. „Produkte“ ist der Wert von Produkten, die du behalten darfst. Auch sie zählen steuerlich in der Regel als Einnahme (<a href="https://www.ihk.de/hamburg/produktmarken/beratung-service/recht-und-steuern/steuerrecht/allgemeine-informationen/steuern-fuer-influencer-5350958" target="_blank" rel="noopener noreferrer">IHK Hamburg</a>). Keine Steuerberatung.</p>
+    <p class="klein leise" style="margin:14px 0 0">„Rechnung offen“ ist Geld aus Deals, für die du schon eine Rechnung geschickt hast, die aber noch nicht bezahlt ist. „Zugesagt“ ist Geld aus festen Deals, für die du noch keine Rechnung geschickt hast. „Produkte“ ist der Wert von Produkten, die du behalten darfst. Er zählt, sobald der Beitrag veröffentlicht ist. „Bezahlt“ und „Produkte“ gelten für das Jahr oben rechts.</p>
+    <p class="klein leise" style="margin:8px 0 0">Auch Produkte zählen steuerlich in der Regel als Einnahme (<a href="https://www.ihk.de/hamburg/produktmarken/beratung-service/recht-und-steuern/steuerrecht/allgemeine-informationen/steuern-fuer-influencer-5350958" target="_blank" rel="noopener noreferrer">IHK Hamburg</a>). Dealbuch ersetzt keine Steuerberatung.</p>
   </section>
 
   <section class="karte" aria-labelledby="naechstes-titel">
@@ -191,7 +200,7 @@
       <div class="zwei">
         <div class="feld">
           <label for="f-marke">Marke</label>
-          <input type="text" id="f-marke" maxlength="60" autocomplete="off" aria-describedby="f-marke-fehler" placeholder="zum Beispiel Hautwerk">
+          <input type="text" id="f-marke" maxlength="60" autocomplete="off" aria-describedby="f-marke-fehler" placeholder="z. B. Hautwerk">
         </div>
         <div class="feld">
           <label for="f-status">Stand</label>
@@ -199,25 +208,27 @@
         </div>
       </div>
       <p class="fehler" id="f-marke-fehler" role="alert" hidden></p>
+      <p class="klein leise" style="margin:-4px 0 0">„Stand“ heißt: wo der Deal gerade steht. Später schaltest du ihn an seiner Karte mit „Weiter“ einen Schritt weiter.</p>
       <div class="zwei">
         <div class="feld">
           <label for="f-honorar">Honorar in €</label>
-          <input type="text" id="f-honorar" inputmode="decimal" autocomplete="off" placeholder="0,00">
+          <input type="text" id="f-honorar" inputmode="decimal" autocomplete="off" placeholder="z. B. 1500">
         </div>
         <div class="feld">
           <label for="f-sachwert">Wert der Produkte in €</label>
-          <input type="text" id="f-sachwert" inputmode="decimal" autocomplete="off" placeholder="0,00">
+          <input type="text" id="f-sachwert" inputmode="decimal" autocomplete="off" placeholder="z. B. 89,90" aria-describedby="f-sachwert-hilfe">
         </div>
       </div>
+      <p class="klein leise" id="f-sachwert-hilfe" style="margin:-4px 0 0">Wert der Produkte: nur ausfüllen, wenn du Produkte behalten darfst. Sonst leer lassen.</p>
       <p class="fehler" id="f-geld-fehler" role="alert" hidden></p>
       <div class="zwei">
         <div class="feld">
           <label for="f-plattform">Plattform</label>
-          <input type="text" id="f-plattform" maxlength="60" autocomplete="off" placeholder="Instagram, TikTok">
+          <input type="text" id="f-plattform" maxlength="60" autocomplete="off" placeholder="z. B. TikTok">
         </div>
         <div class="feld">
           <label for="f-leistung">Leistung</label>
-          <input type="text" id="f-leistung" maxlength="120" autocomplete="off" placeholder="1 Reel, 3 Stories">
+          <input type="text" id="f-leistung" maxlength="120" autocomplete="off" placeholder="z. B. 1 Reel">
         </div>
       </div>
       <div class="drei">
@@ -248,6 +259,7 @@
               <input type="text" id="f-kontakt" maxlength="120" autocomplete="off" placeholder="Name oder E-Mail">
             </div>
           </div>
+          <p class="klein leise" style="margin:0">„Exklusiv bis“: Bis zu diesem Tag darfst du laut eurer Absprache nicht für andere Marken derselben Branche werben. Trägst du für eine andere Marke einen Deal in derselben Branche ein, warnt dich Dealbuch. Dafür muss bei beiden Deals eine Branche stehen. „Nutzungsrechte bis“: Bis zu diesem Tag darf die Marke deinen Beitrag laut eurer Absprache selbst nutzen, zum Beispiel für eigene Werbung.</p>
           <div class="feld">
             <label for="f-notiz">Notiz</label>
             <textarea id="f-notiz" maxlength="500" rows="3"></textarea>
@@ -276,25 +288,27 @@
 
   <section class="karte">
     <details id="einstellungen">
-      <summary data-ev="einstellungen">Sichern und Exportieren</summary>
-      <p class="klein leise">Deine Deals liegen nur in diesem Browser auf diesem Gerät. Sichere sie ab und zu, sonst sind sie weg, wenn du die Browserdaten löschst.</p>
+      <summary data-ev="einstellungen">Sichern, Kalender und Tabelle</summary>
+      <p class="klein leise">Deine Deals liegen nur in diesem Browser auf diesem Gerät. Löschst du die Daten des Browsers, sind sie weg. Sichere sie deshalb ab und zu mit „Sicherung speichern“. Das lädt eine Datei herunter. Mit „Sicherung einspielen“ holst du deine Deals aus dieser Datei zurück, auch auf ein neues Gerät. Was schon da ist, kommt nicht doppelt.</p>
       <div class="knopfreihe">
         <button class="knopf" type="button" id="x-sicherung" data-ev="export_sicherung">Sicherung speichern</button>
         <button class="knopf" type="button" id="x-einspielen" data-ev="import_sicherung">Sicherung einspielen</button>
         <input type="file" id="x-datei" accept=".json,application/json" hidden>
         <button class="knopf" type="button" id="x-kalender" data-ev="export_kalender">Fristen in den Kalender</button>
-        <button class="knopf" type="button" id="x-tabelle" data-ev="export_csv">Als Tabelle (CSV)</button>
+        <button class="knopf" type="button" id="x-tabelle" data-ev="export_csv">Als Tabelle (für Excel)</button>
         <button class="knopf" type="button" id="x-nebenbei" data-ev="export_nebenbei">Bezahltes für Nebenbei</button>
         <button class="knopf gefahr" type="button" id="x-loeschen" data-ev="alles_loeschen">Alle Daten löschen</button>
       </div>
-      <p class="klein leise" style="margin:12px 0 0">„Fristen in den Kalender“ erzeugt eine Kalenderdatei, die du in Apple, Google oder Outlook öffnest. „Bezahltes für Nebenbei“ kannst du in <a href="https://klickmill.app/nebenbei/" target="_blank" rel="noopener">Nebenbei</a> unter „Sicherung einspielen“ laden, dort siehst du Gewinn und Steuergrenzen. Alles entsteht in deinem Browser, nichts wird hochgeladen.</p>
+      <p class="klein leise" style="margin:12px 0 0">„Fristen in den Kalender“ speichert deine Fristen als Datei. Öffnest du sie, landen die Termine in deinem Kalender, zum Beispiel bei Apple, Google oder Outlook.</p>
+      <p class="klein leise" style="margin:8px 0 0">„Bezahltes für Nebenbei“ speichert deine bezahlten Deals als Datei. Die lädst du in unserer App <a href="https://klickmill.app/nebenbei/" target="_blank" rel="noopener">Nebenbei</a> mit „Sicherung einspielen“. Nebenbei zeigt dir dann deinen Gewinn und die Steuergrenzen.</p>
+      <p class="klein leise" style="margin:8px 0 0">Alle diese Dateien entstehen in deinem Browser. Nichts davon wird hochgeladen.</p>
     </details>
   </section>
 
   <section class="karte" aria-labelledby="beta-titel">
-    <h2 id="beta-titel">Du testest Dealbuch mit</h2>
-    <p>Dealbuch ist eine <strong>Testfassung</strong>. Es läuft im Browser, damit wir ohne Umweg über einen App-Store schnell verbessern können. In den Play Store und den App Store geht es erst, wenn du und viele andere es gern nutzen.</p>
-    <p>Wenn es dir hilft: <strong>teile es</strong>. Und sag uns, was fehlt oder stört. So bauen wir es mit dir zusammen weiter.</p>
+    <h2 id="beta-titel">Das ist eine Testfassung</h2>
+    <p>Dealbuch ist noch eine <strong>Testfassung</strong>. Du nutzt es im Browser, ohne App-Store und ohne Konto. In die App-Stores kommt es erst, wenn viele es gern nutzen.</p>
+    <p>Hilft es dir? Dann teile es gern. Und sag uns, was fehlt oder stört.</p>
     <div class="feld" style="gap:10px">
       <button class="knopf" id="beta-teilen" type="button" data-ev="teilen_app">App teilen</button>
       <label class="label" for="beta-text">Dein Feedback</label>
@@ -303,18 +317,21 @@
       <input id="beta-kontakt" type="text" maxlength="200" autocomplete="off" placeholder="E-Mail oder leer lassen">
       <button class="knopf" id="beta-senden" type="button">Feedback senden</button>
       <p class="klein" id="beta-stand" role="status" aria-live="polite" hidden></p>
-      <p class="klein leise" style="margin:0">Dein Feedback geht an uns (klickmill.app), ohne IP-Adresse und ohne Kennung. Deine Deals schicken wir nie mit. Mehr dazu im <a href="datenschutz.html">Datenschutz</a>.</p>
+      <p class="klein leise" style="margin:0">Dein Feedback geht an uns, die Macher von Dealbuch (klickmill.app). Wir speichern dabei weder deine IP-Adresse, also die Internet-Anschrift deines Geräts, noch eine andere Kennung. Deine E-Mail sehen wir nur, wenn du sie selbst einträgst. Deine Deals schicken wir nie mit. Mehr dazu im <a href="datenschutz.html">Datenschutz</a>.</p>
     </div>
   </section>
 
   <section class="karte" aria-labelledby="ueber-titel">
     <h2 id="ueber-titel">Was diese App nach außen schickt</h2>
-    <p>Deine Einträge bleiben in diesem Browser auf deinem Gerät. Nach außen gehen genau zwei Dinge, beide an klickmill.app: ein anonymer Zähler (App-Start und gedrückte Knöpfe, ohne Kennung, ohne Cookie) und dein Feedback, wenn du es oben abschickst. Sonst nichts: kein Konto, keine Werbung, keine fremden Skripte oder Schriften.</p>
+    <p>Deine Deals bleiben in diesem Browser auf deinem Gerät. Nur zwei Dinge gehen an uns (klickmill.app):</p>
+    <p><strong>Ein Nutzungszähler.</strong> Er meldet, dass die App geöffnet wurde und welche der wichtigsten Knöpfe gedrückt wurden. Er weiß nicht, wer du bist, und setzt kein Cookie, also keine kleine Datei zum Wiedererkennen.</p>
+    <p><strong>Dein Feedback</strong>, aber nur, wenn du es selbst abschickst.</p>
+    <p>Sonst nichts. Es gibt kein Konto und keine Werbung. Die App lädt auch nichts von anderen Firmen nach, keine Programme und keine Schriftarten.</p>
     <label class="haken" for="zaehler-aus" style="margin-top:8px">
       <input type="checkbox" id="zaehler-aus">
-      <span>Zähler abschalten. Dann zählt dieses Gerät nicht mehr mit. Der Schalter bleibt nur hier gespeichert.</span>
+      <span>Zähler abschalten. Dann meldet dieser Browser keine App-Starts und Knöpfe mehr.</span>
     </label>
-    <p class="leise" style="margin-top:10px">Version 1.4 vom 26.10.2026 · <a href="aenderungen.html">Was sich geändert hat</a> · <a href="https://github.com/klickmill/dealbuch" target="_blank" rel="noopener noreferrer">Quellcode</a></p>
+    <p class="leise" style="margin-top:10px">Version 1.5 vom 26.10.2026 · <a href="aenderungen.html">Was sich geändert hat</a> · <a href="https://github.com/klickmill/dealbuch" target="_blank" rel="noopener noreferrer">Quellcode (für Entwickler)</a></p>
   </section>
   <footer class="fuss">
     <a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a>

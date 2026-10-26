@@ -69,7 +69,7 @@ assert.equal(m.liste.find((d) => d.id === "abc123").notiz, "neuer");
 // Tabelle: Formel-Schutz und Anführungszeichen
 const t = D.tabelle([{ ...basis, marke: "=HACK()", notiz: 'a;"b"' }]);
 assert.ok(t.startsWith("﻿Marke;Status;"));
-assert.ok(t.includes("'=HACK();In Produktion;"));
+assert.ok(t.includes("'=HACK();In Arbeit;"));
 assert.ok(t.includes('"a;""b"""'));
 
 // Nebenbei-Export lässt sich von Nebenbei selbst einlesen (App-übergreifend)

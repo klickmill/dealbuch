@@ -6,7 +6,7 @@
 
   var STATUS = [
     ["anfrage", "Anfrage"], ["verhandlung", "Verhandlung"], ["zugesagt", "Zugesagt"],
-    ["produktion", "In Produktion"], ["online", "Online"], ["rechnung", "Rechnung gestellt"],
+    ["produktion", "In Arbeit"], ["online", "Veröffentlicht"], ["rechnung", "Rechnung gestellt"],
     ["bezahlt", "Bezahlt"], ["abgesagt", "Abgesagt"]
   ];
   var STATUS_NAME = {};
