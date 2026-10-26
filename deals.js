@@ -109,12 +109,20 @@
   }
 
   // Laufende Exklusivitäten anderer Deals in derselben Branche (ohne Groß/Klein und Leerzeichen).
+  // Gleiche Branche, auch wenn sie anders getippt ist: Groß und klein, Leerzeichen und
+  // Bindestriche (auch zusammengeschrieben), Umlaute als ä oder ae, zusammengesetzte Zeichen. Bewusst keine
+  // Zuordnung verschiedener Wörter ("Kosmetik" ist nicht "Beauty"), das wäre Raten.
+  function brancheSchluessel(t) {
+    return String(t || "").normalize("NFC").toLowerCase()
+      .replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss")
+      .replace(/[\s\-\u2013_.\/]+/g, "");
+  }
   function exklusivKonflikte(deals, deal, heute) {
-    var b = (deal.branche || "").trim().toLowerCase();
+    var b = brancheSchluessel(deal.branche);
     if (!b) return [];
     return deals.filter(function (x) {
       return x.id !== deal.id && x.status !== "abgesagt" && x.exklusivBis && x.exklusivBis >= heute &&
-        (x.branche || "").trim().toLowerCase() === b && x.marke.toLowerCase() !== deal.marke.toLowerCase();
+        brancheSchluessel(x.branche) === b && x.marke.toLowerCase() !== deal.marke.toLowerCase();
     });
   }
 
@@ -202,7 +210,7 @@
 
   var api = { STATUS: STATUS, STATUS_NAME: STATUS_NAME, datumOk: datumOk, parseBetrag: parseBetrag, euro: euro,
     tageBis: tageBis, naechsterStatus: naechsterStatus, saeubern: saeubern, anstehend: anstehend, summen: summen,
-    exklusivKonflikte: exklusivKonflikte, zusammenfuehren: zusammenfuehren, sicherung: sicherung,
+    exklusivKonflikte: exklusivKonflikte, brancheSchluessel: brancheSchluessel, zusammenfuehren: zusammenfuehren, sicherung: sicherung,
     sicherungLesen: sicherungLesen, tabelle: tabelle, fuerNebenbei: fuerNebenbei, kalender: kalender };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else wurzel.Deals = api;

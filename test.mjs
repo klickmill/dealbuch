@@ -108,4 +108,22 @@ const wild = D.saeubern({ ...basis, t: 1e17, fristOnline: "", bezahltAm: "", sta
 assert.equal(wild.t, 0);
 assert.doesNotThrow(() => D.summen([wild], 2026));
 
+// Branche gleich, auch anders getippt (1.4); verschiedene Wörter bleiben verschieden.
+assert.equal(D.brancheSchluessel("  Haut-Pflege "), D.brancheSchluessel("haut pflege"));
+assert.equal(D.brancheSchluessel("Getränke"), D.brancheSchluessel("Getraenke"));
+assert.equal(D.brancheSchluessel("Getra\u0308nke"), D.brancheSchluessel("Getränke"), "zerlegtes ä (NFD) gleich");
+assert.equal(D.brancheSchluessel("Fußball"), D.brancheSchluessel("FUSSBALL"));
+assert.notEqual(D.brancheSchluessel("Kosmetik"), D.brancheSchluessel("Beauty"));
+assert.equal(D.brancheSchluessel("Möbel/Öl_Ü."), D.brancheSchluessel("moebeloelue"));
+assert.equal(D.brancheSchluessel("Haut\u2013Pflege"), D.brancheSchluessel("Hautpflege"), "langer Strich wie Bindestrich");
+assert.equal(D.brancheSchluessel(""), "");
+assert.equal(D.brancheSchluessel(undefined), "");
+const exA = D.saeubern({ ...basis, id: "exk001", marke: "Firma A", branche: "Haut-Pflege", exklusivBis: "2026-12-31", status: "zugesagt" });
+const exNeu = { ...basis, id: "exk002", marke: "Firma B", branche: "hautpflege" };
+assert.equal(D.exklusivKonflikte([exA], exNeu, "2026-10-26").length, 1, "Haut-Pflege gleich hautpflege");
+assert.equal(D.exklusivKonflikte([exA], { ...exNeu, branche: "haut pflege" }, "2026-10-26").length, 1);
+assert.equal(D.exklusivKonflikte([exA], { ...exNeu, branche: "Kosmetik" }, "2026-10-26").length, 0);
+assert.equal(D.exklusivKonflikte([{ ...exA, branche: "" }], { ...exNeu, branche: "---" }, "2026-10-26").length, 0, "nur Trennzeichen löst nichts aus");
+assert.equal(D.exklusivKonflikte([{ ...exA, branche: "---" }], { ...exNeu, branche: "Kosmetik" }, "2026-10-26").length, 0);
+
 console.log("deals.js: alle Prüfungen bestanden");
