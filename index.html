@@ -118,6 +118,10 @@
   }
   .knopf:active { transform: scale(.98); }
   .knopf.haupt { background: var(--akzent); border-color: var(--akzent); color: var(--auf-akzent); }
+  /* Erster Bildschirm nach dem Muster von Klartext: Alltagsfrage groß, ein Hauptknopf in voller Breite, mehr Luft. */
+  .frage { margin: 0 0 14px; font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; }
+  .einstieg p { line-height: 1.55; margin-bottom: 12px; }
+  .knopf.breit { display: block; width: 100%; min-height: 52px; }
   .knopf.gefahr { color: var(--rot); }
   .knopf.klein-k { min-height: 44px; padding: 8px 14px; font-size: 0.9rem; }
   .knopf.rund { min-height: 44px; min-width: 44px; padding: 0 12px; }
@@ -169,12 +173,12 @@
     </div>
   </header>
 
-  <section class="karte" id="willkommen" aria-labelledby="wk-titel" hidden style="border-color: var(--akzent)">
-    <h2 id="wk-titel">Alle Kooperationen an einem Ort</h2>
+  <section class="karte einstieg" id="willkommen" aria-labelledby="wk-titel" hidden style="border-color: var(--akzent)">
+    <h2 class="frage" id="wk-titel">Wer zahlt dir wann?</h2>
     <p><strong>Das Problem:</strong> Arbeitest du als Creator mit mehreren Marken, verlierst du schnell den Überblick. Wer zahlt wann? Was muss bis wann online sein? Und für wen darfst du gerade nicht werben?</p>
     <p><strong>Die Lösung:</strong> Du trägst jede Zusammenarbeit mit einer Marke als Deal ein, mit Honorar und Fristen. Dealbuch zeigt dir, was als Nächstes fällig ist und welche Rechnung noch offen ist. Trägst du ein, bis wann du für eine Branche exklusiv bist, warnt es dich, wenn du bei einer anderen Marke dieselbe Branche einträgst.</p>
     <p><strong>Zuerst:</strong> Trag deinen ersten Deal ein. Nur die Marke ist Pflicht.</p>
-    <button class="knopf haupt" type="button" id="wk-los" data-ev="start">Ersten Deal eintragen</button>
+    <button class="knopf haupt breit" type="button" id="wk-los" data-ev="start">Ersten Deal eintragen</button>
   </section>
 
   <section class="karte" aria-labelledby="geld-titel">
@@ -221,6 +225,10 @@
       </div>
       <p class="klein leise" id="f-sachwert-hilfe" style="margin:-4px 0 0">Wert der Produkte: nur ausfüllen, wenn du Produkte behalten darfst. Sonst leer lassen.</p>
       <p class="fehler" id="f-geld-fehler" role="alert" hidden></p>
+      <details id="fristen">
+        <summary>Plattform, Leistung und Fristen</summary>
+        <div style="display:grid;gap:12px">
+      <p class="klein leise" style="margin:0">Mit Fristen zeigt Dealbuch dir unter „Als Nächstes“, was wann fällig ist.</p>
       <div class="zwei">
         <div class="feld">
           <label for="f-plattform">Plattform</label>
@@ -236,6 +244,8 @@
         <div class="feld"><label for="f-fristOnline">Veröffentlichung</label><input type="date" id="f-fristOnline"></div>
         <div class="feld"><label for="f-fristZahlung">Zahlung fällig</label><input type="date" id="f-fristZahlung"></div>
       </div>
+        </div>
+      </details>
       <details id="mehr">
         <summary>Exklusivität, Rechte, Kontakt, Notiz</summary>
         <div style="display:grid;gap:12px">
@@ -331,7 +341,7 @@
       <input type="checkbox" id="zaehler-aus">
       <span>Zähler abschalten. Dann meldet dieser Browser keine App-Starts und Knöpfe mehr.</span>
     </label>
-    <p class="leise" style="margin-top:10px">Version 1.5 vom 26.10.2026 · <a href="aenderungen.html">Was sich geändert hat</a> · <a href="https://github.com/klickmill/dealbuch" target="_blank" rel="noopener noreferrer">Quellcode (für Entwickler)</a></p>
+    <p class="leise" style="margin-top:10px">Version 1.6 vom 29.10.2026 · <a href="aenderungen.html">Was sich geändert hat</a> · <a href="https://github.com/klickmill/dealbuch" target="_blank" rel="noopener noreferrer">Quellcode (für Entwickler)</a></p>
   </section>
   <footer class="fuss">
     <a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a>
@@ -356,15 +366,29 @@
   var BASIS = "https://klickmill.app";
   // Zähler-Schalter: liegt nur in diesem Browser, wird vor jedem Ping gelesen.
   var ZAEHLER_AUS = "dealbuch-zaehler-aus";
-  function zaehlerAus() {
+  // Gespeicherte Wahl, gilt ab dem nächsten Start.
+  function zaehlerGespeichertAus() {
     try { return localStorage.getItem(ZAEHLER_AUS) === "1"; } catch (e) { return false; }
+  }
+  // In der laufenden Sitzung zählt das Kästchen selbst: lässt der Browser kein Speichern zu,
+  // bleibt der Zähler trotzdem aus, solange die Seite offen ist.
+  function zaehlerAus() {
+    var box = document.getElementById("zaehler-aus");
+    return box ? box.checked : zaehlerGespeichertAus();
   }
   (function () {
     var box = document.getElementById("zaehler-aus");
     if (!box) return;
-    box.checked = zaehlerAus();
+    var text = box.nextElementSibling, normal = text ? text.textContent : "";
+    box.checked = zaehlerGespeichertAus();
     box.addEventListener("change", function () {
-      try { localStorage.setItem(ZAEHLER_AUS, box.checked ? "1" : "0"); } catch (e) {}
+      var geklappt = true;
+      try {
+        if (box.checked) localStorage.setItem(ZAEHLER_AUS, "1"); else localStorage.removeItem(ZAEHLER_AUS);
+      } catch (e) { geklappt = false; }
+      if (text) text.textContent = !geklappt && box.checked
+        ? "Zähler aus, aber nur, bis du die Seite schließt. Dein Browser lässt das Speichern nicht zu."
+        : normal;
     });
   })();
   function ping(ev) {
@@ -442,6 +466,7 @@
     $("f-speichern").textContent = "Deal speichern";
     $("f-abbrechen").hidden = true;
     $("mehr").open = false;
+    $("fristen").open = false;
     ["f-marke-fehler", "f-geld-fehler"].forEach(function (id) { $(id).hidden = true; });
   }
   function geldFeld(cent) { return cent ? (cent / 100).toFixed(2).replace(".", ",").replace(",00", "") : ""; }
@@ -456,6 +481,7 @@
     $("f-speichern").textContent = "Änderungen speichern";
     $("f-abbrechen").hidden = false;
     $("mehr").open = !!(d.branche || d.exklusivBis || d.rechteBis || d.kontakt || d.notiz || d.werbung);
+    $("fristen").open = !!(d.plattform || d.leistung || d.fristEntwurf || d.fristOnline || d.fristZahlung);
     $("form-karte").scrollIntoView({ behavior: "smooth", block: "start" });
     $("f-marke").focus({ preventScroll: true });
   }
@@ -586,11 +612,12 @@
     $("g-sach-label").textContent = "Produkte " + jahr;
     $("g-sach").textContent = D.euro(s.sachwert);
     $("willkommen").hidden = daten.willkommenWeg || daten.deals.length > 0;
+    document.querySelector(".kopf .jahr").hidden = !$("willkommen").hidden; // Jahrespfeile erst nach dem Start
 
     var box = $("naechstes");
     box.textContent = "";
     var fristen = D.anstehend(daten.deals, heuteT).slice(0, 8);
-    if (!fristen.length) box.appendChild(el("p", "leise leer", "Keine offenen Fristen. Trag bei deinen Deals Entwurf, Veröffentlichung und Zahlung ein, dann erscheinen sie hier."));
+    if (!fristen.length) box.appendChild(el("p", "leise leer", "Keine offenen Fristen. Trag sie beim Deal unter „Plattform, Leistung und Fristen“ ein, dann erscheinen sie hier."));
     fristen.forEach(function (f) {
       var z = el("div", "frist");
       z.appendChild(el("span", "wann" + (f.tage < 0 ? " rot" : ""), kurzDatum(f.datum)));
@@ -682,7 +709,7 @@
     if (!confirm("Alle Deals auf diesem Gerät löschen? Das lässt sich nicht rückgängig machen.")) return;
     try { localStorage.removeItem(SPEICHER); } catch (e) {}
     try { localStorage.removeItem(ZAEHLER_AUS); } catch (e) {}
-    var zb = document.getElementById("zaehler-aus"); if (zb) zb.checked = false;
+    var zb = document.getElementById("zaehler-aus"); if (zb) { zb.checked = zaehlerGespeichertAus(); zb.dispatchEvent(new Event("change")); } // auch den Satz daneben zurücksetzen
     daten = laden();
     formularLeeren();
     render();

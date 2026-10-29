@@ -2,7 +2,7 @@
 
 // Bei jeder Änderung an den Dateien hochzählen. Der neue Name legt einen neuen
 // Cache an, und beim activate fliegen alle Caches mit anderem Namen raus.
-var VERSION = "dealbuch-v7";
+var VERSION = "dealbuch-v8";
 
 var DATEIEN = [
   "./",
